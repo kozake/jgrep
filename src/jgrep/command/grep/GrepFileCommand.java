@@ -1,6 +1,7 @@
 package jgrep.command.grep;
 
 import jgrep.command.Command;
+import jgrep.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -20,16 +22,20 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     private boolean isRegex;
 
+    private boolean isIgnoreCase;
+
     private Pattern patternedKeyword;
 
     public List<Hit> processMain() throws IOException {
         if (isRegex) {
             return processRegexMain();
         }
+        Function<String, Hit> processLine = isIgnoreCase ? this::processLineIgnoreCase : this::processLine;
+
         try {
             var lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
                 return lines.stream()
-                        .map(this::processLine)
+                        .map(processLine)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
         } catch (IOException ex) {
@@ -45,8 +51,20 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
         }
     }
 
+    private Hit processLineIgnoreCase(String line) {
+        if (StringUtils.containsIgnoreCase(line, keyword)) {
+            return new Hit(targetFile, line);
+        } else {
+            return null;
+        }
+    }
+
     private List<Hit> processRegexMain() {
-        patternedKeyword = Pattern.compile(keyword);
+        int flags = 0;
+        if (isIgnoreCase) {
+            flags |= Pattern.CASE_INSENSITIVE;
+        }
+        patternedKeyword = Pattern.compile(keyword, flags);
         try {
             var lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
             return lines.stream()
@@ -97,5 +115,13 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     public void setRegex(boolean regex) {
         isRegex = regex;
+    }
+
+    public boolean isIgnoreCase() {
+        return isIgnoreCase;
+    }
+
+    public void setIgnoreCase(boolean ignoreCase) {
+        isIgnoreCase = ignoreCase;
     }
 }

@@ -25,6 +25,7 @@ public class MainFrame extends JFrame {
     private JFormattedTextField txtThreads;
     private JCheckBox chkRegex;
     private JComboBox cmbCharsetName;
+    private JCheckBox chkIgnoreCase;
     private SwingWorker grepWorker;
 
     public MainFrame() {
@@ -71,6 +72,7 @@ public class MainFrame extends JFrame {
                         command.setKeyword(txtKeyword.getText());
                         command.setCharsetName(cmbCharsetName.getSelectedItem().toString());
                         command.setRegex(chkRegex.isSelected());
+                        command.setIgnoreCase(chkIgnoreCase.isSelected());
                         command.setThreads(Integer.parseInt(txtThreads.getText()));
                         command.addCommandEventListener(event -> {
                             if (isCancelled()) {
@@ -252,6 +254,9 @@ public class MainFrame extends JFrame {
         chkRegex = new JCheckBox();
         chkRegex.setText("正規表現");
         panel3.add(chkRegex);
+        chkIgnoreCase = new JCheckBox();
+        chkIgnoreCase.setText("大文字小文字を区別しない");
+        panel3.add(chkIgnoreCase);
         final JLabel label3 = new JLabel();
         label3.setText("スレッド数");
         panel3.add(label3);

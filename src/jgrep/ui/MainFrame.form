@@ -139,6 +139,12 @@
               <text value="正規表現"/>
             </properties>
           </component>
+          <component id="9caad" class="javax.swing.JCheckBox" binding="chkIgnoreCase">
+            <constraints/>
+            <properties>
+              <text value="大文字小文字を区別しない"/>
+            </properties>
+          </component>
           <component id="519d7" class="javax.swing.JLabel">
             <constraints/>
             <properties>

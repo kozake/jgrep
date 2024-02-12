@@ -20,6 +20,8 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     private boolean isRegex;
 
+    private boolean isIgnoreCase;
+
     private int threads;
 
     private ExecutorService executorService;
@@ -53,6 +55,7 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
                 command.setKeyword(keyword);
                 command.setCharsetName(charsetName);
                 command.setRegex(isRegex);
+                command.setIgnoreCase(isIgnoreCase);
                 command.addCommandEventListener(commandEventListener);
                 return command.execute();
             });
@@ -126,6 +129,14 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     public void setRegex(boolean regex) {
         isRegex = regex;
+    }
+
+    public boolean isIgnoreCase() {
+        return isIgnoreCase;
+    }
+
+    public void setIgnoreCase(boolean ignoreCase) {
+        isIgnoreCase = ignoreCase;
     }
 
     public int getThreads() {
