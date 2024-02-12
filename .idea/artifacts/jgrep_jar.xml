@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="jgrep:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/jgrep_jar</output-path>
+    <root id="archive" name="jgrep_jar.jar">
+      <element id="module-output" name="jgrep" />
+    </root>
+  </artifact>
+</component>
