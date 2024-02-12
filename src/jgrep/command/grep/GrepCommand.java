@@ -18,6 +18,8 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     private String charsetName;
 
+    private boolean isRegex;
+
     private int threads;
 
     private ExecutorService executorService;
@@ -115,6 +117,14 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     public void setCharsetName(String charsetName) {
         this.charsetName = charsetName;
+    }
+
+    public boolean isRegex() {
+        return isRegex;
+    }
+
+    public void setRegex(boolean regex) {
+        isRegex = regex;
     }
 
     public int getThreads() {

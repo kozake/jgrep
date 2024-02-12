@@ -70,6 +70,7 @@ public class MainFrame extends JFrame {
                         command.setTargetDirectory(new File(txtTargetDirectory.getText()));
                         command.setKeyword(txtKeyword.getText());
                         command.setCharsetName(cmbCharsetName.getSelectedItem().toString());
+                        command.setRegex(chkRegex.isSelected());
                         command.setThreads(Integer.parseInt(txtThreads.getText()));
                         command.addCommandEventListener(event -> {
                             if (isCancelled()) {
