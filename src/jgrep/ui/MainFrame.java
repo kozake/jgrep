@@ -24,6 +24,7 @@ public class MainFrame extends JFrame {
     private JLabel lblProgress;
     private JFormattedTextField txtThreads;
     private JCheckBox chkRegex;
+    private JComboBox cmbCharsetName;
     private SwingWorker grepWorker;
 
     public MainFrame() {
@@ -68,6 +69,7 @@ public class MainFrame extends JFrame {
                         GrepCommand command = new GrepCommand();
                         command.setTargetDirectory(new File(txtTargetDirectory.getText()));
                         command.setKeyword(txtKeyword.getText());
+                        command.setCharsetName(cmbCharsetName.getSelectedItem().toString());
                         command.setThreads(Integer.parseInt(txtThreads.getText()));
                         command.addCommandEventListener(event -> {
                             if (isCancelled()) {
@@ -238,6 +240,14 @@ public class MainFrame extends JFrame {
         gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         pnlMain.add(panel3, gbc);
+        cmbCharsetName = new JComboBox();
+        cmbCharsetName.setEditable(false);
+        final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+        defaultComboBoxModel1.addElement("UTF-8");
+        defaultComboBoxModel1.addElement("windows-31j");
+        defaultComboBoxModel1.addElement("EUC-JP");
+        cmbCharsetName.setModel(defaultComboBoxModel1);
+        panel3.add(cmbCharsetName);
         chkRegex = new JCheckBox();
         chkRegex.setText("正規表現");
         panel3.add(chkRegex);

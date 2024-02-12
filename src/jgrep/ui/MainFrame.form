@@ -122,6 +122,17 @@
         <properties/>
         <border type="none"/>
         <children>
+          <component id="80876" class="javax.swing.JComboBox" binding="cmbCharsetName">
+            <constraints/>
+            <properties>
+              <editable value="false"/>
+              <model>
+                <item value="UTF-8"/>
+                <item value="windows-31j"/>
+                <item value="EUC-JP"/>
+              </model>
+            </properties>
+          </component>
           <component id="10eeb" class="javax.swing.JCheckBox" binding="chkRegex">
             <constraints/>
             <properties>

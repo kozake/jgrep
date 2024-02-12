@@ -4,6 +4,7 @@ import jgrep.command.Command;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
@@ -14,9 +15,11 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     private String keyword;
 
+    private String charsetName;
+
     public List<Hit> processMain() throws IOException {
         try {
-            var lines = Files.readAllLines(this.targetFile.toPath());
+            var lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
                 return lines.stream()
                         .map(this::processLine)
                         .filter(Objects::nonNull)
@@ -48,5 +51,13 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     public void setKeyword(String keyword) {
         this.keyword = keyword;
+    }
+
+    public String getCharsetName() {
+        return charsetName;
+    }
+
+    public void setCharsetName(String charsetName) {
+        this.charsetName = charsetName;
     }
 }

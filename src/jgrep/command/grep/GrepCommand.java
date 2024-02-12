@@ -16,6 +16,8 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     private String keyword;
 
+    private String charsetName;
+
     private int threads;
 
     private ExecutorService executorService;
@@ -47,6 +49,7 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
                 var command = new GrepFileCommand();
                 command.setTargetFile(file);
                 command.setKeyword(keyword);
+                command.setCharsetName(charsetName);
                 command.addCommandEventListener(commandEventListener);
                 return command.execute();
             });
@@ -104,6 +107,14 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     public void setKeyword(String keyword) {
         this.keyword = keyword;
+    }
+
+    public String getCharsetName() {
+        return charsetName;
+    }
+
+    public void setCharsetName(String charsetName) {
+        this.charsetName = charsetName;
     }
 
     public int getThreads() {
