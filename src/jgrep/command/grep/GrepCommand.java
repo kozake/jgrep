@@ -1,18 +1,19 @@
 package jgrep.command.grep;
 
 import jgrep.command.Command;
-import jgrep.command.event.*;
+import jgrep.command.event.CommandEvent;
+import jgrep.command.event.CommandEventListener;
+import jgrep.command.event.CommandEventType;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.nio.file.FileSystems;
-import java.nio.file.PathMatcher;
+import java.nio.file.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 public class GrepCommand extends Command<List<Hit>, List<Hit>> {
     private File targetDirectory;
@@ -44,29 +45,32 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
             final List<Future<List<Hit>>> acc,
             final CommandEventListener<List<Hit>, Void> commandEventListener,
             final File file,
-            final FileFilter fileFilter) {
+            final PathMatcher matcher) {
 
-        if (Thread.currentThread().isInterrupted()) {
-            return Collections.emptyList();
-        }
+        try (Stream<Path> stream = Files.walk(file.toPath())) {
+            stream.filter(matcher::matches).forEach(path -> {
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new RuntimeException("canceled");
+                }
+                if (!Files.isDirectory(path)) {
+                    var future = executorService.submit(() -> {
+                        var command = new GrepFileCommand();
+                        command.setTargetFile(path.toFile());
+                        command.setKeyword(keyword);
+                        command.setCharsetName(charsetName);
+                        command.setRegex(isRegex);
+                        command.setIgnoreCase(isIgnoreCase);
+                        command.addCommandEventListener(commandEventListener);
+                        return command.execute();
+                    });
+                    acc.add(future);
+                }
 
-        if (file.isDirectory()) {
-            for (File f : Objects.requireNonNull(file.listFiles(fileFilter))) {
-                grep(acc, commandEventListener, f, fileFilter);
-            }
-        } else {
-            var future = executorService.submit(() -> {
-                var command = new GrepFileCommand();
-                command.setTargetFile(file);
-                command.setKeyword(keyword);
-                command.setCharsetName(charsetName);
-                command.setRegex(isRegex);
-                command.setIgnoreCase(isIgnoreCase);
-                command.addCommandEventListener(commandEventListener);
-                return command.execute();
             });
-            acc.add(future);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         return acc;
     }
 
@@ -87,15 +91,11 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
             }
         };
 
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher(
+        FileSystem fileSystem = FileSystems.getDefault();
+        PathMatcher matcher = fileSystem.getPathMatcher(
                 "glob:**/{" + (targetGlobPattern.isEmpty() ? "*" : targetGlobPattern) + "}");
 
-        var futureResults = grep(new ArrayList<>(), commandEventListener, file, f -> {
-            if (f.isDirectory()) {
-                return true;
-            }
-            return matcher.matches(f.toPath());
-        });
+        var futureResults = grep(new ArrayList<>(), commandEventListener, file, matcher);
         countTarget.set(futureResults.size());
 
         List<Hit> result = new ArrayList<>();
