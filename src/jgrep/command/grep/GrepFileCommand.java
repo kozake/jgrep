@@ -60,7 +60,7 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     private Hit processRegexLine(String line) {
         var matcher = patternedKeyword.matcher(line);
-        if (matcher.matches()) {
+        if (matcher.find()) {
             return new Hit(targetFile, line);
         } else {
             return null;

@@ -52,6 +52,7 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
                 command.setTargetFile(file);
                 command.setKeyword(keyword);
                 command.setCharsetName(charsetName);
+                command.setRegex(isRegex);
                 command.addCommandEventListener(commandEventListener);
                 return command.execute();
             });
