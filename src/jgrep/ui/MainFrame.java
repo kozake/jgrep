@@ -26,6 +26,7 @@ public class MainFrame extends JFrame {
     private JCheckBox chkRegex;
     private JComboBox cmbCharsetName;
     private JCheckBox chkIgnoreCase;
+    private JFormattedTextField txtTargetGlobPattern;
     private SwingWorker grepWorker;
 
     public MainFrame() {
@@ -69,6 +70,7 @@ public class MainFrame extends JFrame {
                     try {
                         GrepCommand command = new GrepCommand();
                         command.setTargetDirectory(new File(txtTargetDirectory.getText()));
+                        command.setTargetGlobPattern(txtTargetGlobPattern.getText());
                         command.setKeyword(txtKeyword.getText());
                         command.setCharsetName(cmbCharsetName.getSelectedItem().toString());
                         command.setRegex(chkRegex.isSelected());
@@ -165,7 +167,6 @@ public class MainFrame extends JFrame {
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         pnlMain.add(panel1, gbc);
         txtTargetDirectory = new JTextField();
@@ -189,15 +190,14 @@ public class MainFrame extends JFrame {
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 1;
-        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         pnlMain.add(txtKeyword, gbc);
         final JScrollPane scrollPane1 = new JScrollPane();
-        scrollPane1.setPreferredSize(new Dimension(500, 300));
+        scrollPane1.setPreferredSize(new Dimension(600, 300));
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 3;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
@@ -205,19 +205,12 @@ public class MainFrame extends JFrame {
         txaOutput = new JTextArea();
         txaOutput.setEditable(true);
         scrollPane1.setViewportView(txaOutput);
-        btnGrep = new JButton();
-        btnGrep.setText("grep");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 2;
-        gbc.gridy = 3;
-        gbc.anchor = GridBagConstraints.EAST;
-        pnlMain.add(btnGrep, gbc);
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 3;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         pnlMain.add(panel2, gbc);
         lblProgress = new JLabel();
@@ -240,7 +233,7 @@ public class MainFrame extends JFrame {
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.gridwidth = 3;
+        gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.BOTH;
         pnlMain.add(panel3, gbc);
         cmbCharsetName = new JComboBox();
@@ -263,14 +256,27 @@ public class MainFrame extends JFrame {
         txtThreads.setPreferredSize(new Dimension(60, 30));
         txtThreads.setText("5");
         panel3.add(txtThreads);
-        final JPanel panel4 = new JPanel();
-        panel4.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+        btnGrep = new JButton();
+        btnGrep.setText("grep");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.EAST;
+        pnlMain.add(btnGrep, gbc);
+        final JLabel label4 = new JLabel();
+        label4.setText("対象ファイル");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        pnlMain.add(label4, gbc);
+        txtTargetGlobPattern = new JFormattedTextField();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 3;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
-        pnlMain.add(panel4, gbc);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        pnlMain.add(txtTargetGlobPattern, gbc);
     }
 
     /**

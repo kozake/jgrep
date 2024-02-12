@@ -4,6 +4,9 @@ import jgrep.command.Command;
 import jgrep.command.event.*;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.nio.file.FileSystems;
+import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GrepCommand extends Command<List<Hit>, List<Hit>> {
     private File targetDirectory;
+
+    private String targetGlobPattern;
 
     private String keyword;
 
@@ -38,15 +43,16 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
     private List<Future<List<Hit>>> grep(
             final List<Future<List<Hit>>> acc,
             final CommandEventListener<List<Hit>, Void> commandEventListener,
-            final File file) {
+            final File file,
+            final FileFilter fileFilter) {
 
         if (Thread.currentThread().isInterrupted()) {
             return Collections.emptyList();
         }
 
         if (file.isDirectory()) {
-            for (File f : Objects.requireNonNull(file.listFiles())) {
-                grep(acc, commandEventListener, f);
+            for (File f : Objects.requireNonNull(file.listFiles(fileFilter))) {
+                grep(acc, commandEventListener, f, fileFilter);
             }
         } else {
             var future = executorService.submit(() -> {
@@ -81,7 +87,15 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
             }
         };
 
-        var futureResults = grep(new ArrayList<>(), commandEventListener, file);
+        PathMatcher matcher = FileSystems.getDefault().getPathMatcher(
+                "glob:**/{" + (targetGlobPattern.isEmpty() ? "*" : targetGlobPattern) + "}");
+
+        var futureResults = grep(new ArrayList<>(), commandEventListener, file, f -> {
+            if (f.isDirectory()) {
+                return true;
+            }
+            return matcher.matches(f.toPath());
+        });
         countTarget.set(futureResults.size());
 
         List<Hit> result = new ArrayList<>();
@@ -105,6 +119,14 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     public void setTargetDirectory(File targetDirectory) {
         this.targetDirectory = targetDirectory;
+    }
+
+    public String getTargetGlobPattern() {
+        return targetGlobPattern;
+    }
+
+    public void setTargetGlobPattern(String targetGlobPattern) {
+        this.targetGlobPattern = targetGlobPattern;
     }
 
     public String getKeyword() {
