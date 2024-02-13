@@ -40,12 +40,12 @@ public class CommandEvent<T, V> {
     }
 
     public static <T, V>CommandEvent<T, V> newStart() {
-        var event = new CommandEvent<T, V>(CommandEventType.Start);
+        CommandEvent<T, V> event = new CommandEvent<T, V>(CommandEventType.Start);
         return event;
     }
 
     public static <T, V> CommandEvent<T, V> newProcess(int top, int bottom, V... chunks) {
-        var event = new CommandEvent<T, V>(CommandEventType.Process);
+        CommandEvent<T, V> event = new CommandEvent<T, V>(CommandEventType.Process);
         event.top = top;
         event.bottom = bottom;
         event.chunks = chunks;
@@ -53,7 +53,7 @@ public class CommandEvent<T, V> {
     }
 
     public static <T, V> CommandEvent<T, V> newFinish(T result) {
-        var event = new CommandEvent<T, V>(CommandEventType.Finish);
+        CommandEvent<T, V> event = new CommandEvent<T, V>(CommandEventType.Finish);
         event.result = result;
         return event;
     }

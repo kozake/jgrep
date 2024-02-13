@@ -53,8 +53,8 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
                     throw new RuntimeException("canceled");
                 }
                 if (!Files.isDirectory(path)) {
-                    var future = executorService.submit(() -> {
-                        var command = new GrepFileCommand();
+                    Future<List<Hit>> future = executorService.submit(() -> {
+                        GrepFileCommand command = new GrepFileCommand();
                         command.setTargetFile(path.toFile());
                         command.setKeyword(keyword);
                         command.setCharsetName(charsetName);
@@ -76,12 +76,12 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     private List<Hit> grep(final File file) {
         AtomicInteger countTarget = new AtomicInteger(CommandEvent.UNKNOWN_PROGRESS);
-        var commandEventListener = new CommandEventListener<List<Hit>, Void>() {
+        CommandEventListener<List<Hit>, Void> commandEventListener = new CommandEventListener<List<Hit>, Void>() {
             final AtomicInteger finished = new AtomicInteger(0);
             @Override
             public void actionPerformed(CommandEvent<List<Hit>, Void> event) {
                 if (event.getType() == CommandEventType.Finish) {
-                    var result = event.getResult();
+                    List<Hit> result = event.getResult();
                     List<Hit>[] resultArr = new List[]{result};
                     fireCommandEvent(CommandEvent.newProcess(
                             finished.incrementAndGet(),
@@ -95,7 +95,7 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
         PathMatcher matcher = fileSystem.getPathMatcher(
                 "glob:**/{" + (targetGlobPattern.isEmpty() ? "*" : targetGlobPattern) + "}");
 
-        var futureResults = grep(new ArrayList<>(), commandEventListener, file, matcher);
+        List<Future<List<Hit>>> futureResults = grep(new ArrayList<>(), commandEventListener, file, matcher);
         countTarget.set(futureResults.size());
 
         List<Hit> result = new ArrayList<>();

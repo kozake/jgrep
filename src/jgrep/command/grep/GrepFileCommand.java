@@ -7,9 +7,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -33,13 +35,13 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
         Function<String, Hit> processLine = isIgnoreCase ? this::processLineIgnoreCase : this::processLine;
 
         try {
-            var lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
+            List<String> lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
                 return lines.stream()
                         .map(processLine)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
         } catch (IOException ex) {
-            return List.of();
+            return Collections.emptyList();
         }
     }
 
@@ -66,18 +68,18 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
         }
         patternedKeyword = Pattern.compile(keyword, flags);
         try {
-            var lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
+            List<String> lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
             return lines.stream()
                     .map(this::processRegexLine)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (IOException ex) {
-            return List.of();
+            return Collections.emptyList();
         }
     }
 
     private Hit processRegexLine(String line) {
-        var matcher = patternedKeyword.matcher(line);
+        Matcher matcher = patternedKeyword.matcher(line);
         if (matcher.find()) {
             return new Hit(targetFile, line);
         } else {

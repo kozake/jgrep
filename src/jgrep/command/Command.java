@@ -18,15 +18,15 @@ public abstract class Command<T, V> {
     }
 
     protected void fireCommandEvent(final CommandEvent<T, V> event) {
-        var listeners = new ArrayList<>(commandEventListeners);
-        for (var listener : listeners) {
+        List<CommandEventListener<T, V>> listeners = new ArrayList<>(commandEventListeners);
+        for (CommandEventListener<T, V> listener : listeners) {
             listener.actionPerformed(event);
         }
     }
 
     public T execute() throws Exception {
         fireCommandEvent(CommandEvent.newStart());
-        var result = processMain();
+        T result = processMain();
         fireCommandEvent(CommandEvent.newFinish(result));
         return result;
     }
