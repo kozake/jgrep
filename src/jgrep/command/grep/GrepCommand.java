@@ -15,7 +15,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class GrepCommand extends Command<List<Hit>, List<Hit>> {
+public class GrepCommand extends Command<List<GrepHit>, List<GrepHit>> {
     private File targetDirectory;
 
     private String targetGlobPattern;
@@ -32,7 +32,7 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
 
     private ExecutorService executorService;
 
-    public List<Hit> processMain() throws Exception {
+    public List<GrepHit> processMain() throws Exception {
         executorService = Executors.newFixedThreadPool(threads);
         try {
             return grep(targetDirectory);
@@ -41,9 +41,9 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
         }
     }
 
-    private List<Future<List<Hit>>> grep(
-            final List<Future<List<Hit>>> acc,
-            final CommandEventListener<List<Hit>, Void> commandEventListener,
+    private List<Future<List<GrepHit>>> grep(
+            final List<Future<List<GrepHit>>> acc,
+            final CommandEventListener<List<GrepHit>, Void> commandEventListener,
             final File file,
             final PathMatcher matcher) {
 
@@ -53,7 +53,7 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
                     throw new RuntimeException("canceled");
                 }
                 if (!Files.isDirectory(path)) {
-                    Future<List<Hit>> future = executorService.submit(() -> {
+                    Future<List<GrepHit>> future = executorService.submit(() -> {
                         GrepFileCommand command = new GrepFileCommand();
                         command.setTargetFile(path.toFile());
                         command.setKeyword(keyword);
@@ -74,15 +74,15 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
         return acc;
     }
 
-    private List<Hit> grep(final File file) {
+    private List<GrepHit> grep(final File file) {
         AtomicInteger countTarget = new AtomicInteger(CommandEvent.UNKNOWN_PROGRESS);
-        CommandEventListener<List<Hit>, Void> commandEventListener = new CommandEventListener<List<Hit>, Void>() {
+        CommandEventListener<List<GrepHit>, Void> commandEventListener = new CommandEventListener<List<GrepHit>, Void>() {
             final AtomicInteger finished = new AtomicInteger(0);
             @Override
-            public void actionPerformed(CommandEvent<List<Hit>, Void> event) {
+            public void actionPerformed(CommandEvent<List<GrepHit>, Void> event) {
                 if (event.getType() == CommandEventType.Finish) {
-                    List<Hit> result = event.getResult();
-                    List<Hit>[] resultArr = new List[]{result};
+                    List<GrepHit> result = event.getResult();
+                    List<GrepHit>[] resultArr = new List[]{result};
                     fireCommandEvent(CommandEvent.newProcess(
                             finished.incrementAndGet(),
                             countTarget.get(),
@@ -95,11 +95,11 @@ public class GrepCommand extends Command<List<Hit>, List<Hit>> {
         PathMatcher matcher = fileSystem.getPathMatcher(
                 "glob:**/{" + (targetGlobPattern.isEmpty() ? "*" : targetGlobPattern) + "}");
 
-        List<Future<List<Hit>>> futureResults = grep(new ArrayList<>(), commandEventListener, file, matcher);
+        List<Future<List<GrepHit>>> futureResults = grep(new ArrayList<>(), commandEventListener, file, matcher);
         countTarget.set(futureResults.size());
 
-        List<Hit> result = new ArrayList<>();
-        for (Future<List<Hit>> futureResult : futureResults) {
+        List<GrepHit> result = new ArrayList<>();
+        for (Future<List<GrepHit>> futureResult : futureResults) {
             if (Thread.currentThread().isInterrupted()) {
                 System.out.println("canceld");
                 break;

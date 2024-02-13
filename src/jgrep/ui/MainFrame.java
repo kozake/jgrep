@@ -2,7 +2,8 @@ package jgrep.ui;
 
 import jgrep.command.event.*;
 import jgrep.command.grep.GrepCommand;
-import jgrep.command.grep.Hit;
+import jgrep.command.grep.GrepHit;
+import jgrep.command.grep.GrepHitType;
 
 import javax.swing.*;
 import javax.swing.text.NumberFormatter;
@@ -27,6 +28,7 @@ public class MainFrame extends JFrame {
     private JComboBox cmbCharsetName;
     private JCheckBox chkIgnoreCase;
     private JFormattedTextField txtTargetGlobPattern;
+    private JCheckBox chkOutputError;
     private SwingWorker grepWorker;
 
     public MainFrame() {
@@ -60,11 +62,11 @@ public class MainFrame extends JFrame {
                 return;
             }
             btnGrep.setText("cancel");
-            grepWorker = new SwingWorker<List<Hit>, List<Hit>>() {
+            grepWorker = new SwingWorker<List<GrepHit>, List<GrepHit>>() {
                 private long start;
 
                 @Override
-                protected List<Hit> doInBackground() throws Exception {
+                protected List<GrepHit> doInBackground() throws Exception {
                     start = System.currentTimeMillis();
                     txaOutput.setText("");
                     try {
@@ -98,17 +100,21 @@ public class MainFrame extends JFrame {
                 }
 
                 @Override
-                protected void process(List<List<Hit>> chunks) {
+                protected void process(List<List<GrepHit>> chunks) {
                     try {
-                        for (List<Hit> chunk : chunks) {
-                            for (Hit hit : chunk) {
+                        for (List<GrepHit> chunk : chunks) {
+                            for (GrepHit grepHit : chunk) {
                                 if (isCancelled()) {
                                     return;
                                 }
-                                String line = hit.getLine();
-                                txaOutput.append(hit.getFile().getAbsolutePath() + "(" + hit.getRow() + "," + hit.getIndex() + ")");
-//                                txaOutput.append(hit.getFile().getAbsolutePath() + ": " + line.substring(0, Math.min(line.length(), 20)));
-                                txaOutput.append(System.lineSeparator());
+                                if (grepHit.getType() == GrepHitType.Hit) {
+                                    txaOutput.append(grepHit.getFile().getAbsolutePath() + "(" + grepHit.getRow() + "," + grepHit.getIndex() + ")");
+                                    txaOutput.append(System.lineSeparator());
+                                }
+                                if (grepHit.getType() == GrepHitType.Error && chkOutputError.isSelected()) {
+                                    txaOutput.append("ERROR : " + grepHit.getException().getMessage() + ":" + grepHit.getFile().getAbsolutePath());
+                                    txaOutput.append(System.lineSeparator());
+                                }
                             }
                         }
                     } catch (Exception ex) {
@@ -250,6 +256,9 @@ public class MainFrame extends JFrame {
         chkIgnoreCase = new JCheckBox();
         chkIgnoreCase.setText("大文字小文字を区別しない");
         panel3.add(chkIgnoreCase);
+        chkOutputError = new JCheckBox();
+        chkOutputError.setText("エラーを出力する");
+        panel3.add(chkOutputError);
         final JLabel label3 = new JLabel();
         label3.setText("スレッド数");
         panel3.add(label3);

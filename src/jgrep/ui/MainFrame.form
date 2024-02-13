@@ -136,6 +136,12 @@
               <text value="大文字小文字を区別しない"/>
             </properties>
           </component>
+          <component id="29612" class="javax.swing.JCheckBox" binding="chkOutputError">
+            <constraints/>
+            <properties>
+              <text value="エラーを出力する"/>
+            </properties>
+          </component>
           <component id="519d7" class="javax.swing.JLabel">
             <constraints/>
             <properties>

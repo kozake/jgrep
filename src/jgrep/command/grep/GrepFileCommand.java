@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class GrepFileCommand extends Command<List<Hit>, Void> {
+public class GrepFileCommand extends Command<List<GrepHit>, Void> {
     private File targetFile;
 
     private String keyword;
@@ -30,11 +30,11 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     private int row = 0;
 
-    public List<Hit> processMain() throws IOException {
+    public List<GrepHit> processMain() throws IOException {
         if (isRegex) {
             return processRegexMain();
         }
-        Function<String, Hit> processLine = isIgnoreCase ? this::processLineIgnoreCase : this::processLine;
+        Function<String, GrepHit> processLine = isIgnoreCase ? this::processLineIgnoreCase : this::processLine;
 
         try {
             List<String> lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
@@ -44,29 +44,29 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
         } catch (IOException ex) {
-            return Collections.emptyList();
+            return Collections.singletonList(GrepHit.error(targetFile, ex));
         }
     }
 
-    private Hit processLine(String line) {
+    private GrepHit processLine(String line) {
         int findIndex = line.indexOf(keyword);
         if (findIndex != -1) {
-            return new Hit(targetFile, line, row, findIndex);
+            return GrepHit.hit(targetFile, line, row, findIndex);
         } else {
             return null;
         }
     }
 
-    private Hit processLineIgnoreCase(String line) {
+    private GrepHit processLineIgnoreCase(String line) {
         int findIndex = StringUtils.indexOfIgnoreCase(line, keyword);
         if (findIndex != -1) {
-            return new Hit(targetFile, line, row, findIndex);
+            return GrepHit.hit(targetFile, line, row, findIndex);
         } else {
             return null;
         }
     }
 
-    private List<Hit> processRegexMain() {
+    private List<GrepHit> processRegexMain() {
         int flags = 0;
         if (isIgnoreCase) {
             flags |= Pattern.CASE_INSENSITIVE;
@@ -80,14 +80,14 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (IOException ex) {
-            return Collections.emptyList();
+            return Collections.singletonList(GrepHit.error(targetFile, ex));
         }
     }
 
-    private Hit processRegexLine(String line) {
+    private GrepHit processRegexLine(String line) {
         Matcher matcher = patternedKeyword.matcher(line);
         if (matcher.find()) {
-            return new Hit(targetFile, line, row, matcher.start());
+            return GrepHit.hit(targetFile, line, row, matcher.start());
         } else {
             return null;
         }
