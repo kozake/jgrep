@@ -106,7 +106,7 @@ public class MainFrame extends JFrame {
                                     return;
                                 }
                                 String line = hit.getLine();
-                                txaOutput.append(hit.getFile().getAbsolutePath());
+                                txaOutput.append(hit.getFile().getAbsolutePath() + "(" + hit.getRow() + "," + hit.getIndex() + ")");
 //                                txaOutput.append(hit.getFile().getAbsolutePath() + ": " + line.substring(0, Math.min(line.length(), 20)));
                                 txaOutput.append(System.lineSeparator());
                             }

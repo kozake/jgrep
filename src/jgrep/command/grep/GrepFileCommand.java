@@ -28,6 +28,8 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
 
     private Pattern patternedKeyword;
 
+    private int row = 0;
+
     public List<Hit> processMain() throws IOException {
         if (isRegex) {
             return processRegexMain();
@@ -37,6 +39,7 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
         try {
             List<String> lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
                 return lines.stream()
+                        .peek(line -> row++)
                         .map(processLine)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
@@ -46,16 +49,18 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
     }
 
     private Hit processLine(String line) {
-        if (line.contains(keyword)) {
-            return new Hit(targetFile, line);
+        int findIndex = line.indexOf(keyword);
+        if (findIndex != -1) {
+            return new Hit(targetFile, line, row, findIndex);
         } else {
             return null;
         }
     }
 
     private Hit processLineIgnoreCase(String line) {
-        if (StringUtils.containsIgnoreCase(line, keyword)) {
-            return new Hit(targetFile, line);
+        int findIndex = StringUtils.indexOfIgnoreCase(line, keyword);
+        if (findIndex != -1) {
+            return new Hit(targetFile, line, row, findIndex);
         } else {
             return null;
         }
@@ -70,6 +75,7 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
         try {
             List<String> lines = Files.readAllLines(this.targetFile.toPath(), Charset.forName(charsetName));
             return lines.stream()
+                    .peek(line -> row++)
                     .map(this::processRegexLine)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
@@ -81,7 +87,7 @@ public class GrepFileCommand extends Command<List<Hit>, Void> {
     private Hit processRegexLine(String line) {
         Matcher matcher = patternedKeyword.matcher(line);
         if (matcher.find()) {
-            return new Hit(targetFile, line);
+            return new Hit(targetFile, line, row, matcher.start());
         } else {
             return null;
         }
